@@ -8,7 +8,7 @@ import (
 type stdoutRender struct {
 }
 
-func (r *stdoutRender) Render(summary summary.JobStatusSummary) error {
+func (r *stdoutRender) Render(summary summary.ViewStatus) error {
 	log.Printf("%#v", summary)
 	return nil
 }

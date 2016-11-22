@@ -1,8 +1,8 @@
 package summary
 
-type JobStatusSummary map[string]JobStatus
+type ViewStatus map[string]JobStatus
 
-func (summary JobStatusSummary) Add(view string, status JobStatus) {
+func (summary ViewStatus) Add(view string, status JobStatus) {
 	current, ok := summary[view]
 	if !ok {
 		summary[view] = status

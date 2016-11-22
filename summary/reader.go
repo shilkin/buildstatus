@@ -2,7 +2,6 @@ package summary
 
 import (
 	jenkins "github.com/bndr/gojenkins"
-	"log"
 	"time"
 )
 
@@ -11,7 +10,7 @@ type Reader interface {
 }
 
 type Result struct {
-	StatusSummary JobStatusSummary
+	StatusSummary ViewStatus
 	Err           error
 }
 
@@ -20,26 +19,26 @@ type ReaderOpts struct {
 	Views       []string
 }
 
-type readerImpl struct {
+type jenkinsReader struct {
 	client *jenkins.Jenkins
 	opts   ReaderOpts
 }
 
 func NewReader(client *jenkins.Jenkins, opts ReaderOpts) Reader {
-	return &readerImpl{client: client, opts: opts}
+	return &jenkinsReader{client: client, opts: opts}
 }
 
-func (reader *readerImpl) Read() chan Result {
+func (r *jenkinsReader) Read() chan Result {
 	out := make(chan Result)
 	go func() {
 		for {
-			jobsView, err := reader.getJobsView()
+			jobsSummary, err := r.getViewsStatus()
 			if err != nil {
 				out <- Result{Err: err}
 			} else {
-				out <- Result{StatusSummary: getJobStatusSummary(jobsView)}
+				out <- Result{StatusSummary: jobsSummary}
 			}
-			time.Sleep(reader.opts.TimeoutRead * time.Millisecond)
+			time.Sleep(r.opts.TimeoutRead * time.Millisecond)
 		}
 	}()
 	return out
@@ -47,47 +46,56 @@ func (reader *readerImpl) Read() chan Result {
 
 type JobsView map[string][]string
 
-func (reader *readerImpl) getJobsView() (JobsView, error) {
-	// if view list is not presented
-	if len(reader.opts.Views) == 0 {
-		// read all jobs
-		jobs, err := reader.client.GetAllJobs()
-		if err != nil {
-			return JobsView{}, err
-		}
+func (r *jenkinsReader) getViewsStatus() (result ViewStatus, err error) {
+	result = make(ViewStatus)
 
-		colors := []string{}
-		for _, job := range jobs {
-			colors = append(colors, job.Raw.Color)
-		}
-
-		return JobsView{"All": colors}, nil
+	views, err := r.getViews()
+	if err != nil {
+		return
 	}
 
-	jobsView := make(JobsView)
-	for _, view := range reader.opts.Views {
-		// read jobs in current view
-		v, err := reader.client.GetView(view)
+ViewLoop:
+	for _, view := range views {
+		var v *jenkins.View
+		v, err = r.client.GetView(view)
 		if err != nil {
-			return JobsView{}, err
+			return
 		}
 
-		colors := []string{}
 		jobs := v.GetJobs()
-
 		if len(jobs) == 0 {
-			return JobsView{}, err
+			continue // next view
 		}
 
-		// fill colors array
 		for _, job := range jobs {
-			colors = append(colors, job.Color)
+			status, ok := statusByColor[job.Color]
+			if !ok {
+				continue // next job
+			}
+			result.Add(view, status)
+			if status == INPROGRESS {
+				continue ViewLoop // next view
+			}
 		}
-
-		log.Printf("'%s': %v", view, colors)
-
-		jobsView[view] = colors
 	}
 
-	return jobsView, nil
+	return
+}
+
+func (reader *jenkinsReader) getViews() (result []string, err error) {
+	// if views are set - return them
+	if len(reader.opts.Views) != 0 {
+		result = reader.opts.Views
+		return
+	}
+
+	// if view aren't set - return all from server
+	views, err := reader.client.GetAllViews()
+	if err != nil {
+		return
+	}
+	for _, view := range views {
+		result = append(result, view.Raw.Name)
+	}
+	return
 }
