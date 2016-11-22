@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	url := "http://jenkins11.mailbuild-1.dev.search.km"
+	url := "http://localhost"
 	login := "shilkin"
 	password := "qwerty12345"
 
