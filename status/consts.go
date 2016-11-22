@@ -1,4 +1,4 @@
-package summary
+package status
 
 type JobStatus int
 

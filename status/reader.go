@@ -1,4 +1,4 @@
-package summary
+package status
 
 import (
 	jenkins "github.com/bndr/gojenkins"

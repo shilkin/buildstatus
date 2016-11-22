@@ -2,14 +2,14 @@ package main
 
 import (
 	jenkins "github.com/bndr/gojenkins"
-	"log"
-	"github.com/shilkin/buildstatus/summary"
-	"github.com/shilkin/buildstatus/view"
 	"github.com/shilkin/buildstatus/dispatcher"
+	"github.com/shilkin/buildstatus/status"
+	"github.com/shilkin/buildstatus/view"
+	"log"
 )
 
 func main() {
-	url := "http://localhost"
+	url := "http://jenkins11.mailbuild-1.dev.search.km"
 	login := "shilkin"
 	password := "qwerty12345"
 
@@ -18,15 +18,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	reader := summary.NewReader(client,
-		summary.ReaderOpts{
+	reader := status.NewReader(client,
+		status.ReaderOpts{
 			TimeoutRead: 5000,
-			Views: []string{"Local projects", "Acceptance tests"}})
+			Views:       []string{"Acceptance tests", "Local projects"},
+		})
 	render := view.NewStdoutRender()
 
 	disp := dispatcher.NewDispatcher(reader, render)
 	disp.Run()
 
 }
-
-

@@ -1,7 +1,7 @@
 package view
 
-import "github.com/shilkin/buildstatus/summary"
+import "github.com/shilkin/buildstatus/status"
 
 type Render interface {
-	Render(summary.ViewStatus) error
+	Render(status.ViewStatus) error
 }

@@ -1,7 +1,7 @@
 package dispatcher
 
 import (
-	"github.com/shilkin/buildstatus/summary"
+	"github.com/shilkin/buildstatus/status"
 	"github.com/shilkin/buildstatus/view"
 )
 
@@ -10,7 +10,7 @@ type Dispatcher interface {
 }
 
 type dispatcherImpl struct {
-	reader summary.Reader
+	reader status.Reader
 	render view.Render
 }
 
@@ -24,6 +24,6 @@ func (d *dispatcherImpl) Run() (err error) {
 	return
 }
 
-func NewDispatcher(reader summary.Reader, render view.Render) Dispatcher {
+func NewDispatcher(reader status.Reader, render view.Render) Dispatcher {
 	return &dispatcherImpl{reader: reader, render: render}
 }
