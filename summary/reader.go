@@ -44,8 +44,6 @@ func (r *jenkinsReader) Read() chan Result {
 	return out
 }
 
-type JobsView map[string][]string
-
 func (r *jenkinsReader) getViewsStatus() (result ViewStatus, err error) {
 	result = make(ViewStatus)
 
