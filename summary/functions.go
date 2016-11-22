@@ -3,8 +3,8 @@ package summary
 type JobStatus int
 
 const (
-	FAILED JobStatus = iota
-	SUCCESS
+	SUCCESS JobStatus = iota
+	FAILED
 	INPROGRESS
 )
 
@@ -13,11 +13,12 @@ var statusByColor = map[string]JobStatus{
 	"red":        FAILED,
 	"grey":       SUCCESS,
 	"blue_anime": INPROGRESS,
+	"red_anime":  INPROGRESS,
 }
 
 func getJobStatusSummary(jobsView JobsView) (result JobStatusSummary) {
 	result = make(JobStatusSummary)
-	JobsSummaryLoop:
+JobsSummaryLoop:
 	for view, colors := range jobsView {
 		for _, color := range colors {
 			status, ok := statusByColor[color]

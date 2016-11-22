@@ -6,16 +6,11 @@ import (
 )
 
 type stdoutRender struct {
-
 }
 
-func (r *stdoutRender) Render(summary summary.JobStatusSummary) (err error) {
-	if len(summary) == 0 {
-		log.Printf("jobs are in progress...")
-		return
-	}
+func (r *stdoutRender) Render(summary summary.JobStatusSummary) error {
 	log.Printf("%#v", summary)
-	return
+	return nil
 }
 
 func NewStdoutRender() Render {

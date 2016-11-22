@@ -2,6 +2,7 @@ package summary
 
 import (
 	jenkins "github.com/bndr/gojenkins"
+	"log"
 	"time"
 )
 
@@ -16,13 +17,12 @@ type Result struct {
 
 type ReaderOpts struct {
 	TimeoutRead time.Duration
-	Views []string
+	Views       []string
 }
-
 
 type readerImpl struct {
 	client *jenkins.Jenkins
-	opts ReaderOpts
+	opts   ReaderOpts
 }
 
 func NewReader(client *jenkins.Jenkins, opts ReaderOpts) Reader {
@@ -45,7 +45,7 @@ func (reader *readerImpl) Read() chan Result {
 	return out
 }
 
-type JobsView map[string] []string
+type JobsView map[string][]string
 
 func (reader *readerImpl) getJobsView() (JobsView, error) {
 	// if view list is not presented
@@ -61,7 +61,7 @@ func (reader *readerImpl) getJobsView() (JobsView, error) {
 			colors = append(colors, job.Raw.Color)
 		}
 
-		return JobsView{ "All": colors }, nil
+		return JobsView{"All": colors}, nil
 	}
 
 	jobsView := make(JobsView)
@@ -83,6 +83,8 @@ func (reader *readerImpl) getJobsView() (JobsView, error) {
 		for _, job := range jobs {
 			colors = append(colors, job.Color)
 		}
+
+		log.Printf("'%s': %v", view, colors)
 
 		jobsView[view] = colors
 	}
