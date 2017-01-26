@@ -57,7 +57,7 @@ func NewRaspberryRender(opts RaspberryOpts) (render Render, err error) {
 	return
 }
 
-func (r *raspberryRender) Render(summary status.Result) {
+func (r *raspberryRender) Render(summary status.Result) (err error) {
 	if summary.Err != nil {
 		r.yellow()
 		return
@@ -80,6 +80,8 @@ func (r *raspberryRender) Render(summary status.Result) {
 	case status.INPROGRESS:
 		r.blink()
 	}
+
+	return
 }
 
 func (r *raspberryRender) green() {

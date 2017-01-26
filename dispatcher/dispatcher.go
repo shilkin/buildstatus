@@ -19,7 +19,7 @@ func (d *dispatcherImpl) Run() (err error) {
 		if status.Err != nil {
 			continue
 		}
-		_ = d.render.Render(status.StatusSummary)
+		_ = d.render.Render(status)
 	}
 	return
 }
