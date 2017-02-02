@@ -38,7 +38,7 @@ func (r *jenkinsReader) Read() chan Result {
 			} else {
 				out <- Result{StatusSummary: jobsSummary}
 			}
-			time.Sleep(r.opts.TimeoutRead * time.Millisecond)
+			time.Sleep(r.opts.TimeoutRead)
 		}
 	}()
 	return out
@@ -61,6 +61,7 @@ ViewLoop:
 		}
 
 		jobs := v.GetJobs()
+
 		if len(jobs) == 0 {
 			continue // next view
 		}
@@ -95,5 +96,6 @@ func (reader *jenkinsReader) getViews() (result []string, err error) {
 	for _, view := range views {
 		result = append(result, view.Raw.Name)
 	}
+
 	return
 }

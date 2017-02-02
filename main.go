@@ -23,6 +23,8 @@ var (
 	yellow int
 	red    int
 	green  int
+	// common
+	rendertype string
 )
 
 func init() {
@@ -31,10 +33,11 @@ func init() {
 		defLogin    = "shilkin"
 		defPass     = "qwerty12345"
 		defProjects = "Acceptance tests, Local projects"
-		defYellow   = gpio.GPIO0
-		defRed      = gpio.GPIO1
-		defGreen    = gpio.GPIO2
+		defYellow   = gpio.GPIO10
+		defRed      = gpio.GPIO9
+		defGreen    = gpio.GPIO11
 		defTimeout  = 500 * time.Millisecond
+		defRender   = "stdout"
 	)
 	flag.StringVar(&url, "url", defUrl, "jenkins url 'http://jenkinsurl<:port>'")
 	flag.StringVar(&login, "login", defLogin, "jenkins login")
@@ -44,6 +47,7 @@ func init() {
 	flag.IntVar(&yellow, "ypin", defYellow, "yellow pin number")
 	flag.IntVar(&red, "rpin", defRed, "red pin number")
 	flag.IntVar(&green, "gpin", defGreen, "green pin number")
+	flag.StringVar(&rendertype, "render", defRender, "render type (trafficlight, stdout)")
 }
 
 func main() {
@@ -55,6 +59,11 @@ func main() {
 	}
 
 	projectsList := strings.Split(projects, ",")
+	if len(projectsList) == 1 && projectsList[0] == "" {
+		projectsList = []string{}
+	}
+
+	log.Printf("watching projects: %#v", projectsList)
 
 	reader := status.NewReader(client,
 		status.ReaderOpts{
@@ -62,11 +71,20 @@ func main() {
 			Views:       projectsList,
 		})
 
-	render, err := view.NewRaspberryRender(view.RaspberryOpts{
-		GpioYellow: yellow,
-		GpioRed:    red,
-		GpioGreen:  green,
-	})
+	var render view.Render
+	switch rendertype {
+	case "stdout":
+		render = view.NewStdoutRender()
+	case "trafficlight":
+		render, err = view.NewRaspberryRender(view.RaspberryOpts{
+			GpioYellow: yellow,
+			GpioRed:    red,
+			GpioGreen:  green,
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	disp := dispatcher.NewDispatcher(reader, render)
 	disp.Run()

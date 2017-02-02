@@ -108,7 +108,7 @@ func (r *raspberryRender) blink() {
 			select {
 			case <-r.stopBlinkCh:
 				r.setBlinkingStatus(false)
-				break
+				return
 			default:
 				break
 			}
